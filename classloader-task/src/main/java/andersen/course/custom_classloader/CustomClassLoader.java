@@ -1,9 +1,11 @@
 ﻿package andersen.course.custom_classloader;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Path;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
@@ -19,26 +21,29 @@ public class CustomClassLoader extends ClassLoader {
     private Map<String, Class<?>> classesCache = new HashMap<>();
 
     public CustomClassLoader() {
-	super(ClassLoader.getSystemClassLoader());
+        super(ClassLoader.getSystemClassLoader());
     }
 
-    public CustomClassLoader(Path aJarFilePath) {
-	super(ClassLoader.getSystemClassLoader());
+    public CustomClassLoader(File aJarFilePath) {
+        super(ClassLoader.getSystemClassLoader());
         extractClasses(aJarFilePath);
     }
 
     @Override
-    public Class<?> findClass(String className) {
+    public Class<?> findClass(String className) throws ClassNotFoundException {
         Class<?> clazz = classesCache.get(className);
         if (clazz == null) {
             byte[] bt;
             try {
-                bt = getClassBytes(getClass().getClassLoader()
-                        .getResourceAsStream(className.replace(".", "/") + ".class"));
-                clazz = defineClass(className, bt, 0, bt.length);
+                bt = getClassBytes(getClass()
+                        .getResourceAsStream("/" + className.replace(".", "/") + ".class"));
+                if (bt != null) {
+                    clazz = defineClass(className, bt, 0, bt.length);
+                }
+            } catch (FileNotFoundException ex) {
+                return super.findClass(className);
             } catch (IOException e) {
-		return super.findClass(className);
-                System.err.println("Не удалось найти файл класса");
+                return super.findClass(className);
             }
         }
 
@@ -46,12 +51,32 @@ public class CustomClassLoader extends ClassLoader {
     }
 
     /**
+     * Возвращает класс из файла в файловой системе.
+     *
+     * @param classFile файл класса
+     * @return класс из файла в файловой системе
+     */
+    public Class<?> findClass(File classFile) {
+        try {
+            byte[] bt = getClassBytes(new FileInputStream(classFile));
+            if (bt != null) {
+                return defineClass(classFile.getName(), bt, 0, bt.length);
+            }
+        } catch (FileNotFoundException ex) {
+            System.err.println("Файл класса не найден");
+        } catch (IOException e) {
+            System.err.println("Ошибка чтения файла");
+        }
+        return Object.class;
+    }
+
+    /**
      * Извлекает классы из jar-файла.
      *
      * @param aJarFilePath путь Jar-файла
      */
-    private void extractClasses(Path aJarFilePath) {
-        try (JarFile jarFile = new JarFile(aJarFilePath.toString());) {
+    private void extractClasses(File aJarFilePath) {
+        try (JarFile jarFile = new JarFile(aJarFilePath.getAbsolutePath());) {
             Enumeration<JarEntry> entries = jarFile.entries();
             while (entries.hasMoreElements()) {
                 JarEntry entry = entries.nextElement();
@@ -60,9 +85,11 @@ public class CustomClassLoader extends ClassLoader {
                         String className =
                                 entry.getName().substring(0, entry.getName().length() - 6);
                         className = className.replace('/', '.');
-                        byte[] classBytes = getClassBytes(jarFile.getInputStream(entry));
-                        classesCache.put(className,
-                                defineClass(className, classBytes, 0, classBytes.length));
+                        byte[] classBytes = getClassBytes(inputStream);
+                        if (classBytes != null) {
+                            classesCache.put(className,
+                                    defineClass(className, classBytes, 0, classBytes.length));
+                        }
                     } catch (IOException ioException) {
                         System.err.println("Не удаелось получить класс " + entry.getName());
                     }
@@ -82,11 +109,15 @@ public class CustomClassLoader extends ClassLoader {
      * @return данные класса в виде массива байт
      * @throws IOException при ошибке ввода
      */
-    private static byte[] getClassBytes(InputStream is) throws IOException {
-        try (ByteArrayOutputStream os = new ByteArrayOutputStream();) {
+    private byte[] getClassBytes(InputStream is) throws IOException {
+        if (is == null) {
+            return null;
+        }
+        try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
             byte[] buffer = new byte[0xFFFF];
-            for (int len; (len = is.read(buffer)) != -1;)
+            for (int len; (len = is.read(buffer)) != -1;) {
                 os.write(buffer, 0, len);
+            }
             os.flush();
             return os.toByteArray();
         }
