@@ -11,6 +11,8 @@ public class Node<T> {
 
     private Node<T> prev;
 
+    private int index;
+
     Node(T aElement) {
         element = aElement;
     }
@@ -27,11 +29,11 @@ public class Node<T> {
         return prev;
     }
 
-    protected void setNext(Node<T> next) {
+    void setNext(Node<T> next) {
         this.next = next;
     }
 
-    protected void setPrev(Node<T> prev) {
+    void setPrev(Node<T> prev) {
         this.prev = prev;
     }
 

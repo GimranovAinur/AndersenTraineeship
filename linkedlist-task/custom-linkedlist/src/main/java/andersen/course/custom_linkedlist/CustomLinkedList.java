@@ -5,7 +5,7 @@ package andersen.course.custom_linkedlist;
  *
  * @param <T> тип хранящегося элемента
  */
-public class CustomLinkedList<T> {
+public class CustomLinkedList<T> implements Cloneable {
 
     /** Размер списка */
     private int size;
@@ -49,17 +49,23 @@ public class CustomLinkedList<T> {
         }
 
         Node<T> newNode = new Node<>(aElement);
-        Node<T> currentNode = first;
-        for (int i = 0; i < aIndex; i++) {
-            currentNode = currentNode.getNext();
+        if (aIndex == 0) {
+            newNode.setNext(first);
+            first.setPrev(newNode);
+            first = newNode;
+        } else {
+            Node<T> currentNode = first;
+            for (int i = 0; i < aIndex; i++) {
+                currentNode = currentNode.getNext();
+            }
+
+            Node<T> prevNode = currentNode.getPrev();
+            prevNode.setNext(newNode);
+            currentNode.setPrev(newNode);
+
+            newNode.setPrev(prevNode);
+            newNode.setNext(currentNode);
         }
-
-        Node<T> prevNode = currentNode.getPrev();
-        prevNode.setNext(newNode);
-        currentNode.setPrev(newNode);
-
-        newNode.setPrev(prevNode);
-        newNode.setNext(currentNode);
         size++;
     }
 
@@ -79,6 +85,10 @@ public class CustomLinkedList<T> {
      * @return элемент по индексу
      */
     public T get(int aIndex) {
+        if ((aIndex < 0) || (aIndex >= size)) {
+            return null;
+        }
+
         Node<T> desiredNode = first;
         for (int i = 0; i < aIndex; i++) {
             desiredNode = desiredNode.getNext();
@@ -105,15 +115,27 @@ public class CustomLinkedList<T> {
      * @return удаленный элемент
      */
     public T remove(int aIndex) {
-        Node<T> nodeToRemove = first;
-        for (int i = 0; i < aIndex; i++) {
-            nodeToRemove = nodeToRemove.getNext();
+        Node<T> nodeToRemove;
+        if (aIndex == 0) {
+            nodeToRemove = last;
+            Node<T> nextNode = first.getNext();
+            nextNode.setPrev(null);
+            first = nextNode;
+        } else if (aIndex == (size - 1)) {
+            nodeToRemove = first;
+            Node<T> prevNode = last.getPrev();
+            prevNode.setNext(null);
+            last = prevNode;
+        } else {
+            nodeToRemove = first;
+            for (int i = 0; i < aIndex; i++) {
+                nodeToRemove = nodeToRemove.getNext();
+            }
+            Node<T> prevNode = nodeToRemove.getPrev();
+            Node<T> nextNode = nodeToRemove.getNext();
+            prevNode.setNext(nextNode);
+            nextNode.setPrev(prevNode);
         }
-
-        Node<T> prevNode = nodeToRemove.getPrev();
-        Node<T> nextNode = nodeToRemove.getNext();
-        prevNode.setNext(nextNode);
-        nextNode.setPrev(prevNode);
         size--;
 
         return nodeToRemove.getElement();
@@ -125,23 +147,40 @@ public class CustomLinkedList<T> {
      * @param aElementToRemove элемент для удаления
      * @return удаленный элемент
      */
-    public T remove(T aElementToRemove) {
-        Node<T> nodeToRemove = null;
-        Node<T> currentNode = first;
-        while (nodeToRemove == null) {
-            if (currentNode.getElement().equals(aElementToRemove)) {
-                nodeToRemove = currentNode;
-            }
-            currentNode = currentNode.getNext();
+    public boolean remove(T aElementToRemove) {
+        if ((size == 1) && aElementToRemove.equals(first)) {
+            clear();
+            return true;
         }
 
-        Node<T> prevNode = nodeToRemove.getPrev();
-        Node<T> nextNode = nodeToRemove.getNext();
-        prevNode.setNext(nextNode);
-        nextNode.setPrev(prevNode);
+        boolean removed = false;
+
+        Node<T> nodeToRemove = first;
+        for (int i = 0; i < size; i++) {
+            if (nodeToRemove.getElement().equals(aElementToRemove)) {
+                break;
+            }
+            nodeToRemove = nodeToRemove.getNext();
+        }
+
+        if (nodeToRemove.getPrev() == null) {
+            first = first.getNext();
+            first.setPrev(null);
+            removed = true;
+        } else if (nodeToRemove.getNext() == null) {
+            last = last.getPrev();
+            last.setNext(null);
+            removed = true;
+        } else {
+            Node<T> prevNode = nodeToRemove.getPrev();
+            Node<T> nextNode = nodeToRemove.getNext();
+            prevNode.setNext(nextNode);
+            nextNode.setPrev(prevNode);
+            removed = true;
+        }
         size--;
 
-        return nodeToRemove.getElement();
+        return removed;
     }
 
     /**
@@ -175,6 +214,31 @@ public class CustomLinkedList<T> {
     }
 
     /**
+     * Возвращает признак того, что список пустой.
+     *
+     * @return признак того, что список пустой
+     */
+    public boolean isEmpty() {
+        return size == 0;
+    }
+
+    /**
+     * Возвращает признак наличия элемента в списке.
+     *
+     * @param aElement искомый элемент
+     * @return признак наличия элемента в списке
+     */
+    public boolean contains(T aElement) {
+        Node<T> currentNode = first;
+        for (int i = 0; i < size; i++) {
+            if (currentNode.getElement().equals(aElement)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Возвращает первый элемент.
      *
      * @return первый элемент.
@@ -190,6 +254,11 @@ public class CustomLinkedList<T> {
      */
     public T getLast() {
         return last.getElement();
+    }
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
     }
 
 }
