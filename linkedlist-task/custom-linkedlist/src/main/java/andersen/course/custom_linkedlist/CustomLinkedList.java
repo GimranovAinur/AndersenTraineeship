@@ -24,11 +24,13 @@ public class CustomLinkedList<T> {
     public void add(T aElement) {
         Node<T> newNode = new Node<>(aElement);
         if (first == null) {
+            newNode.setNext(null);
+            newNode.setPrev(null);
             first = newNode;
             last = newNode;
         } else {
-            newNode.setPrev(last);
             last.setNext(newNode);
+            newNode.setPrev(last);
             last = newNode;
         }
         size++;
@@ -149,6 +151,45 @@ public class CustomLinkedList<T> {
      */
     public int size() {
         return size;
+    }
+
+    /**
+     * Реверсирует список.
+     */
+    public void reverse() {
+        Node<T> currentNode = first;
+        Node<T> currentNextNode = first.getNext();
+        last = first;
+        last.setPrev(first.getNext());
+        last.setNext(null);
+
+        while (currentNextNode != null) {
+            Node<T> tempNode = currentNextNode;
+            currentNextNode = currentNextNode.getNext();
+            tempNode.setNext(currentNode);
+            currentNode = tempNode;
+        }
+
+        first = currentNode;
+        first.setPrev(null);
+    }
+
+    /**
+     * Возвращает первый элемент.
+     *
+     * @return первый элемент.
+     */
+    public T getFirst() {
+        return first.getElement();
+    }
+
+    /**
+     * Возвращает последний элемент.
+     *
+     * @return последний элемент
+     */
+    public T getLast() {
+        return last.getElement();
     }
 
 }
