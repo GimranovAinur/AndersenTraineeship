@@ -1,16 +1,14 @@
 package andersen.course.producer_consumer_task;
 
-import java.util.concurrent.BlockingQueue;
-
 /**
  * Производитель.
  */
 public class Producer implements Runnable {
 
     /** Общий буфер */
-    private final BlockingQueue<Integer> buffer;
+    private final SynchronizedBuffer<Integer> buffer;
 
-    public Producer(BlockingQueue<Integer> aBuffer) {
+    public Producer(SynchronizedBuffer<Integer> aBuffer) {
         buffer = aBuffer;
     }
 
@@ -19,9 +17,12 @@ public class Producer implements Runnable {
         int value = 0;
         while (true) {
             try {
-                buffer.put(value);
-                System.out.println("Добавлено значение: " + value);
-                value++;
+                synchronized (buffer) {
+                    buffer.add(value);
+                    System.out.println("Добавлено значение: " + value + "через "
+                            + Thread.currentThread().getName());
+                    value++;
+                }
             } catch (InterruptedException e) {
                 System.out.println("Работа производителя прервана");
                 Thread.currentThread().interrupt();
