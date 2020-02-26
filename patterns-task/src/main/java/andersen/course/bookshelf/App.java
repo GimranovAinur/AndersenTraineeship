@@ -2,10 +2,7 @@ package andersen.course.bookshelf;
 
 import java.util.Scanner;
 
-import andersen.course.bookshelf.entity.Literature;
-import andersen.course.bookshelf.service.CreateBookCommand;
-import andersen.course.bookshelf.service.CreateMagazineCommand;
-import andersen.course.bookshelf.service.ICommand;
+import andersen.course.bookshelf.repository.LiteratureRepo;
 
 /**
  * Hello world!
@@ -13,23 +10,31 @@ import andersen.course.bookshelf.service.ICommand;
 public class App {
 
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        int commandNumber = getCommandNumber(scanner);
-        ICommand command = null;
-        switch (commandNumber) {
-        case 1:
-            command = new CreateBookCommand();
-            break;
-        case 2:
-            command = new CreateMagazineCommand();
-        case 0:
-            System.exit(0);
-        default:
-            System.out.println("Не понял, а как так получилось?!");
-            break;
-        }
-        Literature literature = command.execute(scanner);
-        System.out.println(literature.getTitlePageInfo());
+        // Scanner scanner = new Scanner(System.in);
+        // int commandNumber = getCommandNumber(scanner);
+        // ICommand command = null;
+        // switch (commandNumber) {
+        // case 1:
+        // command = new CreateBookCommand();
+        // break;
+        // case 2:
+        // command = new CreateMagazineCommand();
+        // case 0:
+        // System.exit(0);
+        // default:
+        // System.out.println("Не понял, а как так получилось?!");
+        // break;
+        // }
+
+        // BookBuilder builder = new BookBuilder();
+        // Author author = new Author("Иван", "Тургенев");
+        // List<Author> authors = new ArrayList<>();
+        // authors.add(author);
+        // Publisher publisher = new Publisher("Kek");
+        // Book book = builder.title("Отцы и дети").releaseDate(new Date()).authors(authors)
+        // .publisher(publisher).build();
+        // LiteratureRepo.save(book);
+        System.out.println(LiteratureRepo.findById(2L).getTitlePageInfo());
     }
 
     private static int getCommandNumber(Scanner aScanner) {

@@ -10,6 +10,9 @@ import andersen.course.bookshelf.entity.Literature;
  */
 public class Author {
 
+    /** Идентификатор */
+    private Long id;
+
     /** Имя */
     private String name;
 
@@ -19,9 +22,19 @@ public class Author {
     /** Написанная литература */
     private List<Literature> writtenLiterature = new ArrayList<>();
 
+    public Author(Long aId, String aName, String aSurname) {
+        id = aId;
+        name = aName;
+        surname = aSurname;
+    }
+
     public Author(String aName, String aSurname) {
         name = aName;
         surname = aSurname;
+    }
+
+    public Long getId() {
+        return id;
     }
 
     public String getName() {

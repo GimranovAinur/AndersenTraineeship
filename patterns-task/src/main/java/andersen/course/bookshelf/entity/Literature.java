@@ -11,6 +11,9 @@ import andersen.course.bookshelf.entity.developers.Publisher;
  */
 public abstract class Literature {
 
+    /** Идентификатор */
+    private Long id;
+
     /** Название */
     private String title;
 
@@ -18,7 +21,7 @@ public abstract class Literature {
     private List<Author> authors;
 
     /** Издатель */
-    private Publisher publishers;
+    private Publisher publisher;
 
     /** Дата издания */
     private Date releaseDate;
@@ -36,7 +39,7 @@ public abstract class Literature {
         super();
         this.title = aTitle;
         this.authors = aAuthors;
-        this.publishers = aPublishers;
+        this.publisher = aPublishers;
         this.releaseDate = aReleaseDate;
     }
 
@@ -47,6 +50,14 @@ public abstract class Literature {
      */
     public abstract String getTitlePageInfo();
 
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public String getTitle() {
         return title;
     }
@@ -56,7 +67,7 @@ public abstract class Literature {
     }
 
     public Publisher getPublishers() {
-        return publishers;
+        return publisher;
     }
 
     public Date getReleaseDate() {
